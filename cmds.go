@@ -298,6 +298,11 @@ func exports(socket, certPath string) map[string]string {
 			default:
 				out[name] = fmt.Sprintf("%s,%s", val, ip)
 			}
+			
+			altval := os.Getenv("no_proxy")
+			if altval == "" {
+				out["NO_PROXY"] = out[name]
+			}
 		}
 	}
 	return out
