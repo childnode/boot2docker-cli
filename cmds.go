@@ -275,6 +275,8 @@ func exports(socket, certPath string) map[string]string {
 	} else {
 		out["DOCKER_TLS_VERIFY"] = "1"
 	}
+	
+	checkPathEnvironment()
 
 	//if a http_proxy is set, we need to make sure the boot2docker ip
 	//is added to the NO_PROXY environment variable
@@ -301,6 +303,11 @@ func exports(socket, certPath string) map[string]string {
 		}
 	}
 	return out
+}
+
+// TODO: check for PATH environment that boot2docker is available for user execution
+func checkPathEnvironment() error {
+	// if (os.Getenv("PATH") !~ cmd.Path) { os.Setenv("PATH", fmt.Sprintf("%s:%s", "os.Getenv("PATH"), cmd.Path)) }
 }
 
 // Tell the user the config (and later let them set it?)
