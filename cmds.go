@@ -283,25 +283,31 @@ func exports(socket, certPath string) map[string]string {
 		re := regexp.MustCompile("tcp://([^:]+):")
 		if matches := re.FindStringSubmatch(socket); len(matches) == 2 {
 			ip := matches[1]
-			name := "no_proxy"
-			val := os.Getenv("no_proxy")
-			if val == "" {
-				name = "NO_PROXY"
-				val = os.Getenv("NO_PROXY")
+			noproxyenvname := "no_proxy"
+			noproxyaltenvname := "NO_PROXY"
+			//if lowercase isn't set, use UPPERCASE
+			if os.Getenv(noproxyenvname) == "" {
+				noproxyenvname = "NO_PROXY"
+				noproxyaltenvname = "no_proxy"
 			}
+			proxyval := os.Getenv(noproxyenvname)
+			proxyaltval := os.Getenv(noproxyaltenvname)
 
 			switch {
-			case val == "":
-				out[name] = ip
-			case strings.Contains(val, ip):
-				out[name] = val
+			case proxyval == "":
+				out[noproxyenvname] = ip
+			case strings.Contains(proxyval, ip):
+				out[noproxyenvname] = proxyval
 			default:
-				out[name] = fmt.Sprintf("%s,%s", val, ip)
+				out[noproxyenvname] = fmt.Sprintf("%s,%s", proxyval, ip)
 			}
 			
-			altval := os.Getenv("no_proxy")
-			if altval == "" {
-				out["NO_PROXY"] = out[name]
+			//fix NO_PROXY != no_proxy on windows
+			switch runtime.GOOS {
+			case "windows":
+				if proxyval != proxyaltval {
+					out[noproxyaltenvname] = out[noproxyenvname]
+				}
 			}
 		}
 	}
